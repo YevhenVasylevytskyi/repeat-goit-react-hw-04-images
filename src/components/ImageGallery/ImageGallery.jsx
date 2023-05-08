@@ -7,7 +7,7 @@ import StartView from "./StartView";
 import Button from "components/Button/Button";
 import ApiService from "../../serviсes/ApiService";
 
-// import PropTypes from "prop-types";
+import PropTypes from "prop-types";
 import s from "./ImageGallery.module.css";
 
 class ImageGallery extends Component{
@@ -145,7 +145,7 @@ class ImageGallery extends Component{
 };
 
 ImageGallery.protoType = {
-  
+  searchQuery: PropTypes.string,
 };
 
 export default ImageGallery;

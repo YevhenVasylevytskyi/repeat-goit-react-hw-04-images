@@ -1,4 +1,3 @@
-// import PropTypes from "prop-types";
 import s from "./Searchbar.module.css";
 
 const Searchbar = ({ children }) => {
@@ -8,10 +7,6 @@ const Searchbar = ({ children }) => {
       {children}
      </header>
   )
-  
-};
-
-Searchbar.protoType = {
   
 };
 

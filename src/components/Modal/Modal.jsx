@@ -1,7 +1,8 @@
-// import PropTypes from "prop-types";
 import { Component } from "react";
-import s from "./Modal.module.css";
 import { createPortal } from "react-dom";
+
+import PropTypes from "prop-types";
+import s from "./Modal.module.css";
 
 const modalRoot = document.querySelector('#modal-root');
 
@@ -41,7 +42,8 @@ class Modal extends Component {
 }
 
 Modal.protoType = {
-  
+  item: PropTypes.object,
+  onClose: PropTypes.func,
 };
 
 export default Modal;

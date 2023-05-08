@@ -2,7 +2,7 @@ import { Component } from "react";
 import { FiSearch } from "react-icons/fi";
 import { toast } from 'react-toastify';
 
-// import PropTypes from "prop-types";
+import PropTypes from "prop-types";
 import s from "./SearchForm.module.css";
 
 class SearchForm extends Component{  
@@ -56,7 +56,7 @@ class SearchForm extends Component{
 };
 
 SearchForm.protoType = {
-  
+  onSubmit: PropTypes.func,
 };
 
 export default SearchForm;
