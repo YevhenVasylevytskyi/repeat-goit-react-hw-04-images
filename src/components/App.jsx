@@ -1,35 +1,30 @@
 import { ToastContainer } from 'react-toastify';
-import { Component } from "react";
+import {useState } from "react";
 import Searchbar from "./Searchbar/Searchbar";
 import SearchForm from "./SearchForm/SearchForm";
 import ImageGallery from "./ImageGallery/ImageGallery";
 
 import 'react-toastify/dist/ReactToastify.css';
 
-export class App extends Component {
+export function App() {
 
-  state = {
-    searchQuery: "",
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const handleFormSubmit = searchQuery => {
+    setSearchQuery(searchQuery)
   }
-
-  handleFormSubmit = searchQuery => {
-    this.setState({searchQuery})
-  }
-
-  render() {
-    return (
+  
+  return (
       <>
         <Searchbar>
           <SearchForm
-            onSubmit={this.handleFormSubmit}
+            onSubmit={handleFormSubmit}
           />
         </Searchbar>
-        <ImageGallery searchQuery={this.state.searchQuery} />
-        {/* <Button /> */}
+        <ImageGallery searchQuery={searchQuery} />
         <ToastContainer
           autoClose={3000}
         />
       </>
     )
-  }
-};
+}
