@@ -1,4 +1,4 @@
-import { Component } from "react";
+import { useEffect, useState } from "react";
 import ImageGalleryItem from "components/ImageGalleryItem/ImageGalleryItem";
 import Loader from "components/Loader/Loader";
 import ErrorView from "./ErrorView";
@@ -10,55 +10,48 @@ import ApiService from "../../serviсes/ApiService";
 import PropTypes from "prop-types";
 import s from "./ImageGallery.module.css";
 
-class ImageGallery extends Component{
+const newApiService = new ApiService();
 
-  state = {
-    cards: [],
-    // loading: false,
-    error: null,
-    status: 'idle',
-    page: 1,
-  };  
+function ImageGallery({ searchQuery }) {
+  const [cards, setCards] = useState([]);
+  const [status, setStatus] = useState('idle');
 
-  componentDidUpdate(prevProps, prevState) {
-    const prevQuery = prevProps.searchQuery;
-    const nextQuery = this.props.searchQuery;
+  useEffect(() => {
 
-    if (prevQuery !== nextQuery) {
-      this.setState({ /*loading: true, cards: null,*/ status: 'pending' })
-      
-      ApiService(nextQuery, 1)
-        .then(result => {
-        if (result.hits.length !== 0) {
-          return this.setState({
-            cards: result.hits,
-            status: 'resolved',
-            page: 1,
-          });
-        }
-
-        return this.setState({ cards: result.hits, status: 'rejected' });
-      })
-        .catch(error => this.setState({ error, status: 'rejected' }))
-        // .finally(this.setState({ loading: true }))
+    if (searchQuery === '') {
+      return;
     }
-  }
+    
+    setStatus('pending')
 
-  loadMore = () => {
-    const nextSearch = this.props.searchQuery;
-    const { page } = this.state;
-    this.setState({ status: 'pending' });
-
-    ApiService(nextSearch, page + 1)
+    newApiService.value = searchQuery;
+    newApiService.resetPage();
+    newApiService.getImages()
       .then(result => {
-        return this.setState(prevState => {
-          return {
-            cards: [...prevState.cards, ...result.hits],
-            status: 'resolved',
-            page: prevState.page + 1,
-          };
-        });
+        
+        if (result.hits.length !== 0) {
+          setCards(result.hits)
+          setStatus('resolved')          
+          return;
+        }
+        
+        setCards(result.hits)
+        setStatus('rejected')
+        return result;
       })
+      .catch(err => console.warn(err))      
+  }, [searchQuery])
+
+  const loadMore = () => {
+    setStatus('pending')
+
+    newApiService.getImages()
+      .then(result => {
+        setCards([...cards, ...result.hits])
+        setStatus('resolved')        
+        return result;
+      })
+      .catch(err => console.warn(err)) 
       .finally(() => {
         setTimeout(() => {
           window.scrollTo({
@@ -66,83 +59,52 @@ class ImageGallery extends Component{
             behavior: 'smooth',
           });
         }, 100);
+        return;
       });
-    // console.log("this.state.page", this.state.page);
-  };
-
-
-  render() {
-    const {
-      cards,
-      // loading,
-      error,
-      status
-    } = this.state;
-
-    const {searchQuery} = this.props;
-    
-    if (status === 'idle') { 
-      return  <StartView />
-    }
-
-    if (status === 'pending') {
-      return (
-        <>
-          <ul className={s.ImageGallery}>
-            {cards.map(item => (
-              <ImageGalleryItem item={item} key={item.id} />
-            ))} 
-          </ul>
-          <Loader />
-        </>
-      );
-    }
-
-    if (status === 'rejected') {
-      return <ErrorView message={ error.message } />
-    }
-
-    if (status === 'resolved') {
-      
-      if (cards.length === 0) {
-        return <NoPhotoView searchQuery={ searchQuery } />
-        }
-            
-      return (
-        <>
-          <ul className={s.ImageGallery} >
-              
-            {cards.map(item => (
-              <ImageGalleryItem item={item} key={item.id} />
-            ))} 
-                      
-          </ul >
-
-          <Button loadMore={this.loadMore} />
-        </>
-      )             
-      
-    }
-
-
-    // return (
-    //   <>
-    //     {error && <p className={s.notQuery}>{error.message}</p>}
-    //     {loading && !data && !error && <Loader />}
-    //     {!data && !loading && <p className={s.notQuery}>Введіть пошуковий запит</p>}
-    //     {data &&
-    //       <ul className={s.ImageGallery}>
-            
-    //         {data.hits.map(item => (
-    //           <ImageGalleryItem item={item} key={item.id} />  
-    //         ))} 
-            
-    //       </ul>
-    //     }
-    //   </>
-    // )      
   }
-};
+    
+  if (status === 'idle') { 
+    return  <StartView />
+  }
+    
+  if (status === 'pending') {
+    return (
+      <>
+        <ul className={s.ImageGallery}>
+          {cards.map(item => (
+            <ImageGalleryItem item={item} key={item.id} />
+            ))} 
+        </ul>
+        <Loader />
+      </>
+    );
+  }
+    
+  if (status === 'rejected') {
+    return <ErrorView message={searchQuery} />
+  }
+    
+  if (status === 'resolved') {
+      
+    if (cards.length === 0) {
+      return <NoPhotoView searchQuery={ searchQuery } />
+    }
+            
+    return (
+      <>
+        <ul className={s.ImageGallery} >
+              
+          {cards.map(item => (
+            <ImageGalleryItem item={item} key={item.id} />
+          ))} 
+                      
+        </ul >
+
+        <Button loadMore={loadMore} />
+      </>
+    )     
+  } 
+}
 
 ImageGallery.protoType = {
   searchQuery: PropTypes.string,
